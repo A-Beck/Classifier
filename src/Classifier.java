@@ -10,7 +10,7 @@ public abstract class Classifier{
      * Constructor: Initializes the classifier by reading in the .names file which lets the object
      * know what features of what types to expect
      */
-    public Classifier(String namesFilepath){}
+    //public Classifier(String namesFilepath){}
 
     /**
      * Reads in the file at 'trainingDataFilepath' and trains this classifier on this training data
