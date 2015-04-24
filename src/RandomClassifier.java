@@ -12,10 +12,11 @@ import java.util.HashMap;
 import java.io.FileReader;
 
 public class RandomClassifier extends Classifier {
-    public String names_file;
-    public HashMap<String, String> fields;
     public double[] thetaValues;
     double theta;
+    public String names_file;  // file name for the name file
+    public HashMap<String, ArrayList<String>> fields;  // relates features to the allowed values
+    public ArrayList<String> feature_order;  // order in which the features will appear in the .train file
 
     /**
      * Constructor: Initializes the classifier by reading in the .names file which lets the object
@@ -25,29 +26,65 @@ public class RandomClassifier extends Classifier {
         this.names_file = namesFilepath;
         this.thetaValues = new double[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         this.theta = 0;
+        this.fields = new HashMap<String, ArrayList<String>>();
+        this.feature_order = new ArrayList<String>();
     }
 
-    public void read_name_file() {
+
+    /**
+     * Reads in the file at 'trainingDataFilepath' and trains this classifier on this training data
+     */
+    public void train(String trainingDataFilpath){}
+
+    /**
+     * Makes predictions on new test data given at 'testDataFilepath'. Should print predictions to
+     * standard output, one classification per line. Nothing else should be printed to standard output
+     */
+    public void makePredictions(String testDataFilepath){}
+
+    public static void main(String [] args) {
+        String file = "C:\\Users\\student\\Classifier\\Training_Data\\census.names";
+        String train_file = "C:\\Users\\student\\Classifier\\Training_Data\\census.train";
+        RandomClassifier MyClassifier = new RandomClassifier(file);
+        MyClassifier.read_name_file();
+        MyClassifier.read_training_file(train_file);
+
+    }
+
+    // reads the training file
+    public ArrayList<int []> read_training_file(String train_file) {
+        int num_features = this.fields.keySet().size();
+        ArrayList<int []> training_data = new ArrayList<int []>();
         BufferedReader Reader = null;
         try {
-            Reader = new BufferedReader( new FileReader(this.names_file ));
+            Reader = new BufferedReader( new FileReader(train_file));
             String line = null;
             try {
                 while ((line = Reader.readLine()) != null) {
                     if (line.isEmpty()) {
-                        continue;
-                    }  // ignore blank lines
+                        continue;  // ignore blank lines
+                    }
                     else {
-                        String[] parts = line.split(" ");
+                        int[] features = new int[num_features + 1];
+                        String[] parts = line.split("\\s+");
                         int len = parts.length;
-                        for (String str : parts) {
-                            System.out.print(str);
-                            System.out.print(",");
+                        for (int i = 0; i < len; i++) {
+                            if (i < num_features) {  // if its on of the features
+                                String label = this.feature_order.get(i);
+                                if (this.fields.get(label).size() == 1) { // if the field is numeric
+                                    features[i] = Integer.parseInt(parts[i]);
+                                } else {  // if the field is not numeric
+                                    int index = this.fields.get(label).indexOf(parts[i]);
+                                    features[i] = index;
+                                }
+                            } else {  // other wise it is the last element, the result
+                                features[i] = parts[i].equals(">50K") ? 1 : 0;
+                            }
                         }
-                        System.out.println("");
-
+                        training_data.add(features);
                     }
                 }
+
             }
             catch (IOException e) {}
 
@@ -61,18 +98,9 @@ public class RandomClassifier extends Classifier {
                 catch (IOException e) {}
             }
         }
+
+        return training_data;
     }
-
-    /**
-     * Reads in the file at 'trainingDataFilepath' and trains this classifier on this training data
-     */
-    public void train(String trainingDataFilpath){}
-
-    /**
-     * Makes predictions on new test data given at 'testDataFilepath'. Should print predictions to
-     * standard output, one classification per line. Nothing else should be printed to standard output
-     */
-    public void makePredictions(String testDataFilepath){}
 
     public double costFunction(ArrayList<int[]> dataList) {
 
@@ -86,8 +114,8 @@ public class RandomClassifier extends Classifier {
 
         for (int i = 0; i < m; i++) {
             int[] row = dataList.get(i);
-            int[] yVal = row[row.length]; // FIX/VERIFY
-            sum += Math.pow(hypothesisFunction(row - yVal), 2);
+            int yVal = row[row.length-1];  // FIX/VERIFY
+            sum += Math.pow(hypothesisFunction(row) - yVal, 2);
         }
         return (1 / (2 * m)) * sum;
     }
@@ -99,11 +127,44 @@ public class RandomClassifier extends Classifier {
                 thetaValues[10] * row[10] + thetaValues[11] * row[11] + thetaValues[12] * row[12];
     }
 
-    public static void main(String [] args) {
-        String file = "C:\\Users\\student\\Classifier\\Training_Data\\census.names";
-        RandomClassifier MyClassifier = new RandomClassifier(file);
-        MyClassifier.read_name_file();
-
+    public void read_name_file() {
+        BufferedReader Reader = null;
+        try {
+            Reader = new BufferedReader( new FileReader(this.names_file ));
+            String line = null;
+            try {
+                while ((line = Reader.readLine()) != null) {
+                    if (line.isEmpty()) {
+                        continue;  // ignore blank lines
+                    }
+                    else {
+                        String[] parts = line.split("\\s+");
+                        int len = parts.length;
+                        if (len > 0) {
+                            String label = parts[0];
+                            if (label.equals(">50K")) {
+                                continue; // not a field, just the available options
+                            }
+                            this.feature_order.add(label);
+                            this.fields.put(label, new ArrayList<String>());
+                            for (int i = 1; i < len; i++) {
+                                this.fields.get(label).add(parts[i]);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (IOException e) {}
+        }
+        catch (FileNotFoundException e) {}
+        finally {
+            if (Reader != null) {
+                try {
+                    Reader.close();
+                }
+                catch (IOException e) {}
+            }
+        }
     }
 
 }
