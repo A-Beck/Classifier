@@ -36,7 +36,7 @@ public class RandomClassifier extends Classifier {
      */
     public void train(String trainingDataFilpath){
         this.read_name_file();
-        ArrayList<int []> training_data = read_data_file(trainingDataFilpath);
+        ArrayList<int []> training_data = read_data_file(trainingDataFilpath, 1);
     }
 
     /**
@@ -44,7 +44,7 @@ public class RandomClassifier extends Classifier {
      * standard output, one classification per line. Nothing else should be printed to standard output
      */
     public void makePredictions(String testDataFilepath){
-        ArrayList<int []> test_data = read_data_file(testDataFilepath);
+        ArrayList<int []> test_data = read_data_file(testDataFilepath, 0);
         Random rand = new Random();
         for (int i = 0; i < test_data.size(); i++){
             //int[] arr = test_data.get(i);
@@ -54,8 +54,10 @@ public class RandomClassifier extends Classifier {
         }
     }
 
-    // reads the training file
-    public ArrayList<int []> read_data_file(String train_file) {
+    // reads the data file
+    // if flag == 0, it is a test file
+    // if flag ==1, it is a training file
+    public ArrayList<int []> read_data_file(String train_file, int flag) {
         int num_features = this.fields.keySet().size();
         ArrayList<int []> training_data = new ArrayList<int []>();
         BufferedReader Reader = null;
@@ -68,7 +70,7 @@ public class RandomClassifier extends Classifier {
                         continue;  // ignore blank lines
                     }
                     else {
-                        int[] features = new int[num_features + 1];
+                        int[] features = new int[num_features + flag];
                         String[] parts = line.trim().split("\\s+");
                         int len = parts.length;
                         for (int i = 0; i < len; i++) {
