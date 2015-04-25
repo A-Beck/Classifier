@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 /**
  * Created by Andrew on 4/25/2015.
@@ -21,7 +22,7 @@ public class LogisticClassifier extends Classifier {
         MyClassifier.makePredictions(test_file);
     }
 
-    public double[] thetaValues;
+    public ArrayList<double[]> thetaValues;
     double theta;
     public String names_file;  // file name for the name file
     public HashMap<String, ArrayList<String>> fields;  // relates features to the allowed values
@@ -33,7 +34,6 @@ public class LogisticClassifier extends Classifier {
      */
     public LogisticClassifier(String namesFilepath) {
         this.names_file = namesFilepath;
-        this.thetaValues = new double[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         this.theta = 0;
         this.fields = new HashMap<String, ArrayList<String>>();
         this.feature_order = new ArrayList<String>();
@@ -45,6 +45,7 @@ public class LogisticClassifier extends Classifier {
      */
     public void train(String trainingDataFilepath) {
         this.read_name_file();
+        this.initiailize_thetas();
         ArrayList<ArrayList<int[]>> data = this.read_data_file(trainingDataFilepath);
     }
 
@@ -56,6 +57,21 @@ public class LogisticClassifier extends Classifier {
         ArrayList<ArrayList<int[]>> data = this.read_data_file(testDataFilepath);
     }
 
+    // initialize the theta values with random #'s between 1 and 0
+    public void initiailize_thetas() {
+        Random rand = new Random();
+        this.thetaValues = new ArrayList<double[]>();
+        this.thetaValues.add(new double[]{rand.nextDouble()});  // theta 0
+        for (String label : this.feature_order){
+            int num_values = this.fields.get(label).size();
+            double[] thetas = new double[num_values];
+            for (int i = 0; i < num_values; i++) {
+                thetas[i] = rand.nextDouble();
+            }
+            this.thetaValues.add(thetas);
+        }
+        System.out.println("Finished init thetas");
+    }
 
     // reads the training file
     public  ArrayList<ArrayList<int[]>> read_data_file(String train_file) {
@@ -127,17 +143,19 @@ public class LogisticClassifier extends Classifier {
         for (int i = 0; i < m; i++) {
             int[] row = dataList.get(i);
             int yVal = row[row.length - 1];  // FIX/VERIFY
-            sum += Math.pow(hypothesisFunction(row) - yVal, 2);
+            //sum += Math.pow(hypothesisFunction(row) - yVal, 2);
         }
         return (1 / (2 * m)) * sum;
     }
 
+    /*
     public double hypothesisFunction(int[] row) {
         return theta + thetaValues[0] * row[0] + thetaValues[1] * row[1] + thetaValues[2] * row[2] +
                 thetaValues[3] * row[3] + thetaValues[4] * row[4] + thetaValues[5] * row[5] + thetaValues[6] * row[6] +
                 thetaValues[7] * row[7] + thetaValues[8] * row[8] + thetaValues[9] * row[9] +
                 thetaValues[10] * row[10] + thetaValues[11] * row[11] + thetaValues[12] * row[12];
     }
+    */
 
     public void read_name_file() {
         BufferedReader Reader = null;
