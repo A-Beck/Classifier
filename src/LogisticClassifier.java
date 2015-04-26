@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -47,6 +48,13 @@ public class LogisticClassifier extends Classifier {
         this.read_name_file();
         this.initiailize_thetas();
         ArrayList<ArrayList<int[]>> data = this.read_data_file(trainingDataFilepath, 1);
+        // loop until satisfied
+            // get predictions --> get results from cost fn
+            // run gradient decent --> fix thetas
+
+        for (int i = 0; i < 10; i++) {
+            gradient(data);
+        }
     }
 
     /**
@@ -55,6 +63,11 @@ public class LogisticClassifier extends Classifier {
      */
     public void makePredictions(String testDataFilepath) {
         ArrayList<ArrayList<int[]>> data = this.read_data_file(testDataFilepath, 0);
+        // for all rows, run hypothesis fn
+            // print result
+        for (int i = 0; i < data.size(); i++) {
+            System.out.println(hypothesisFunction(data.get(i)));
+        }
     }
 
     // initialize the theta values with random #'s between 1 and 0
@@ -128,37 +141,11 @@ public class LogisticClassifier extends Classifier {
                 } catch (IOException e) {
                 }
             }
+
         }
 
         return training_data;
     }
-
-    public double costFunction(ArrayList<int[]> dataList) {
-
-        // Last element: if 1, greater than 50k, if 0, less than 50k
-        if (dataList == null || dataList.size() == 0) {
-            System.out.println("COULDN'T PARSE");
-        }
-
-        int m = dataList.size();
-        double sum = 0;
-
-        for (int i = 0; i < m; i++) {
-            int[] row = dataList.get(i);
-            int yVal = row[row.length - 1];  // FIX/VERIFY
-            //sum += Math.pow(hypothesisFunction(row) - yVal, 2);
-        }
-        return (1 / (2 * m)) * sum;
-    }
-
-    /*
-    public double hypothesisFunction(int[] row) {
-        return theta + thetaValues[0] * row[0] + thetaValues[1] * row[1] + thetaValues[2] * row[2] +
-                thetaValues[3] * row[3] + thetaValues[4] * row[4] + thetaValues[5] * row[5] + thetaValues[6] * row[6] +
-                thetaValues[7] * row[7] + thetaValues[8] * row[8] + thetaValues[9] * row[9] +
-                thetaValues[10] * row[10] + thetaValues[11] * row[11] + thetaValues[12] * row[12];
-    }
-    */
 
     public void read_name_file() {
         BufferedReader Reader = null;
@@ -197,5 +184,50 @@ public class LogisticClassifier extends Classifier {
             }
         }
     }
+
+    public double sigmoid(double x) {
+        double den = 1 + Math.pow(Math.exp(1.0), -1 * x);
+        double d = 1 / den;
+        return d;
+    }
+
+    public double hypothesisFunction(ArrayList<int[]> row) {
+        double sum = this.thetaValues.get(0)[0]; // sum = theta_0
+        for (int i = 1; i < thetaValues.size(); i++) {
+            for (int j = 0; j < thetaValues.get(i).length; j++) {
+                sum += thetaValues.get(i)[j] * row.get(i-1)[j];
+            }
+        }
+        return sum;
+    }
+
+    public double costFunction(ArrayList<double[]> thetaVector, ArrayList<ArrayList<int[]>> rows) {
+        double m = rows.size();
+        double cost = 0;
+        for (int i = 0; i < m; i++) {
+            int realValue = rows.get(i).get(rows.get(i).size() - 1)[0];
+            cost += ( (-1 * realValue) * Math.log(hypothesisFunction(rows.get(i)))
+                    - (1 - realValue) * Math.log(1 - hypothesisFunction(rows.get(i))));
+        }
+
+        return cost / m;
+    }
+
+    public void gradient(ArrayList<ArrayList<int[]>> rows) {
+        double learning_rate = 0.05;  // TODO find reasonable value
+        double m = rows.size();
+        for (int j = 0; j < thetaValues.size(); j++) {
+            for (int k = 0; k < thetaValues.get(j).length; k++) {
+                double gradient = 0;
+                for (int i = 0; i < rows.size(); i++) {
+                    int realValue = rows.get(i).get(rows.get(i).size() - 1)[0];
+                    gradient += (hypothesisFunction(rows.get(i)) - realValue) * rows.get(i).get(j)[k];
+                }
+                thetaValues.get(j)[k] = thetaValues.get(j)[k] - learning_rate * (gradient / m );
+            }
+        }
+    }
+
+
 
 }
