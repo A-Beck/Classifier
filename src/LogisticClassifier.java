@@ -46,7 +46,7 @@ public class LogisticClassifier extends Classifier {
     public void train(String trainingDataFilepath) {
         this.read_name_file();
         this.initiailize_thetas();
-        ArrayList<ArrayList<int[]>> data = this.read_data_file(trainingDataFilepath);
+        ArrayList<ArrayList<int[]>> data = this.read_data_file(trainingDataFilepath, 1);
     }
 
     /**
@@ -54,7 +54,7 @@ public class LogisticClassifier extends Classifier {
      * standard output, one classification per line. Nothing else should be printed to standard output
      */
     public void makePredictions(String testDataFilepath) {
-        ArrayList<ArrayList<int[]>> data = this.read_data_file(testDataFilepath);
+        ArrayList<ArrayList<int[]>> data = this.read_data_file(testDataFilepath, 0);
     }
 
     // initialize the theta values with random #'s between 1 and 0
@@ -74,7 +74,9 @@ public class LogisticClassifier extends Classifier {
     }
 
     // reads the training file
-    public  ArrayList<ArrayList<int[]>> read_data_file(String train_file) {
+    // flag == 1 --> read training data
+    // flag == 0 --> read test data
+    public  ArrayList<ArrayList<int[]>> read_data_file(String train_file, int flag) {
         int num_features = this.fields.keySet().size();
         ArrayList<ArrayList<int[]>> training_data = new  ArrayList<ArrayList<int[]>>();
         BufferedReader Reader = null;
@@ -103,7 +105,8 @@ public class LogisticClassifier extends Classifier {
                                     feat[index] = 1;
                                     features.add(feat);
                                 }
-                            } else {  // other wise it is the last element, the result
+                            }  else if (flag == 1) {  // otherwise it is the last element, the result
+                                // only process if reading the training file
                                 int val = parts[i].equals(">50K") ? 1 : 0;
                                 int [] feat = new int[1];
                                 feat[0] = val;

@@ -1,6 +1,7 @@
 /**
  * Created by Andrew on 4/24/2015.
  * This class just guesses the classification: 750 <=50K, 749 >50K
+ * **** WARNING **** this file has outdated definitions of the file reading methods
  */
 
 
@@ -44,7 +45,7 @@ public class RandomClassifier extends Classifier {
      * standard output, one classification per line. Nothing else should be printed to standard output
      */
     public void makePredictions(String testDataFilepath){
-        ArrayList<int []> test_data = read_data_file(testDataFilepath, 0);
+        ArrayList<int []> test_data = read_data_file(testDataFilepath, 1);
         Random rand = new Random();
         for (int i = 0; i < test_data.size(); i++){
             //int[] arr = test_data.get(i);
@@ -77,7 +78,14 @@ public class RandomClassifier extends Classifier {
                             if (i < num_features) {  // if its on of the features
                                 String label = this.feature_order.get(i);
                                 if (this.fields.get(label).size() == 1) { // if the field is numeric
-                                    features[i] = Integer.parseInt(parts[i]);
+                                    try {
+                                        features[i] = Integer.parseInt(parts[i]);
+                                    }
+                                    catch (NumberFormatException e) {
+                                        System.out.print("Wrong: ");
+                                        System.out.println(parts[i]);
+                                        System.out.println(label);
+                                    }
                                 } else {  // if the field is not numeric
                                     int index = this.fields.get(label).indexOf(parts[i]);
                                     features[i] = index;
