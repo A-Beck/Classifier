@@ -15,9 +15,9 @@ import java.util.Random;
 public class LogisticClassifier extends Classifier {
 
     public static void main(String [] args) {
-        String file = "C:\\Users\\student\\Classifier\\Training_Data\\census.names";
-        String train_file = "C:\\Users\\student\\Classifier\\Training_Data\\train1.train";
-        String test_file = "C:\\Users\\student\\Classifier\\Training_Data\\test1.test";
+        String file = "/Users/muntaserahmed/Desktop/4thYear/8thSemester/CS4710/hw/Classifier/Training_Data/census.names";
+        String train_file = "/Users/muntaserahmed/Desktop/4thYear/8thSemester/CS4710/hw/Classifier/Training_Data/train1.train";
+        String test_file = "/Users/muntaserahmed/Desktop/4thYear/8thSemester/CS4710/hw/Classifier/Training_Data/test1.test";
         LogisticClassifier MyClassifier = new LogisticClassifier(file);
         MyClassifier.train(train_file);
         MyClassifier.makePredictions(test_file);
@@ -52,8 +52,9 @@ public class LogisticClassifier extends Classifier {
             // get predictions --> get results from cost fn
             // run gradient decent --> fix thetas
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1000; i++) {
             gradient(data);
+            int y = 1 + 1;
         }
     }
 
@@ -66,7 +67,13 @@ public class LogisticClassifier extends Classifier {
         // for all rows, run hypothesis fn
             // print result
         for (int i = 0; i < data.size(); i++) {
-            System.out.println(hypothesisFunction(data.get(i)));
+            double pred = hypothesisFunction(data.get(i));
+            if (pred > .5) {
+                System.out.println(">50K");
+            }
+            else {
+                System.out.println("<=50K");
+            }
         }
     }
 
@@ -198,7 +205,7 @@ public class LogisticClassifier extends Classifier {
                 sum += thetaValues.get(i)[j] * row.get(i-1)[j];
             }
         }
-        return sum;
+        return sigmoid(sum);
     }
 
     public double costFunction(ArrayList<double[]> thetaVector, ArrayList<ArrayList<int[]>> rows) {
@@ -214,14 +221,14 @@ public class LogisticClassifier extends Classifier {
     }
 
     public void gradient(ArrayList<ArrayList<int[]>> rows) {
-        double learning_rate = 0.05;  // TODO find reasonable value
+        double learning_rate = 0.6;  // TODO find reasonable value
         double m = rows.size();
-        for (int j = 0; j < thetaValues.size(); j++) {
+        for (int j = 1; j < thetaValues.size(); j++) {
             for (int k = 0; k < thetaValues.get(j).length; k++) {
                 double gradient = 0;
                 for (int i = 0; i < rows.size(); i++) {
                     int realValue = rows.get(i).get(rows.get(i).size() - 1)[0];
-                    gradient += (hypothesisFunction(rows.get(i)) - realValue) * rows.get(i).get(j)[k];
+                    gradient += (hypothesisFunction(rows.get(i)) - realValue) * rows.get(i).get(j-1)[k];
                 }
                 thetaValues.get(j)[k] = thetaValues.get(j)[k] - learning_rate * (gradient / m );
             }
