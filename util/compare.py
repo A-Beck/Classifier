@@ -19,10 +19,11 @@ total_count = 0
 while o_line != '' and a_line != '':
 	total_count += 1
 	word_list = a_line.split()
-	res = word_list[len(word_list)-1].strip()
-	print o_line.strip()
-	if o_line.strip() == res:
+	res = word_list[len(word_list)-1].strip().lower()
+	if o_line.strip().lower() == res:
 		correct_count += 1
+	else:
+	    print o_line.strip().lower(), res
 	o_line = output.readline()
 	a_line = actual.readline()
 
