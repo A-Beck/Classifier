@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+
 /**
  * Created by Andrew on 4/25/2015.
  * Implements Logisitic classification
@@ -63,10 +64,15 @@ public class LogisticClassifier extends Classifier {
         // loop until satisfied
         // get predictions --> get results from cost fn
         // run gradient decent --> fix thetas
-
-        for (int i = 0; i < 100; i++) {
+        double delta = 100;
+        while (delta > 1E-4) {
+            ArrayList<double[]> old_thetas = new ArrayList<double[]>();
+            for (double [] d : this.thetaValues) {
+                old_thetas.add(d.clone());
+            }
             gradient(data);
-            int y = 1 + 1;
+            delta = this.calc_theta_diff(old_thetas);
+            //System.out.println(delta);
         }
     }
 
@@ -82,6 +88,7 @@ public class LogisticClassifier extends Classifier {
         // print result
         for (int i = 0; i < data.size(); i++) {
             double pred = hypothesisFunction(data.get(i));
+            //System.out.println(pred);
             if (pred > .5) {
                 System.out.println(">50K");
             } else {
@@ -103,7 +110,6 @@ public class LogisticClassifier extends Classifier {
             }
             this.thetaValues.add(thetas);
         }
-        System.out.println("Finished init thetas");
     }
 
     public void get_max_values(String filename) {
@@ -284,7 +290,7 @@ public class LogisticClassifier extends Classifier {
     }
 
     public void gradient(ArrayList<ArrayList<double[]>> rows) {
-        double learning_rate = 0.6;  // TODO find reasonable value
+        double learning_rate = 0.1;  // TODO find reasonable value
         double m = rows.size();
         // TODO are we treating theta zero right here?
         for (int j = 1; j < thetaValues.size(); j++) {
@@ -297,5 +303,17 @@ public class LogisticClassifier extends Classifier {
                 thetaValues.get(j)[k] = thetaValues.get(j)[k] - learning_rate * (gradient / m);
             }
         }
+    }
+
+    public double calc_theta_diff(ArrayList<double []> old_thetas) {
+        double avg_delta = 0.0;
+        double total = 0.0;
+        for (int i = 0; i < old_thetas.size(); i++) {
+            for (int j = 0; j < old_thetas.get(i).length; j++) {
+                avg_delta += Math.abs(this.thetaValues.get(i)[j] - old_thetas.get(i)[j]);
+                total++;
+            }
+        }
+        return  avg_delta / total;
     }
 }
